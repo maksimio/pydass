@@ -21,4 +21,15 @@ print('--- Варианты:')
 for v in variants:
   print(v)
 
+print('\n\n\n')
+for v in variants:
+  print(v)
+
 # -+-+-+-+-+- Принцип Парето
+# информация о важности не используется
+dass.reset_domination(variants)
+dass.pareto(variants)
+print('\n\n\n')
+for v in variants:
+  print(v)
+

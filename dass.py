@@ -41,3 +41,26 @@ class Importance:
     return '{0}\n{1}'.format(self.positions, self.importances)
 
 # ------------------------ ОБРАБОТКА
+def reset_domination(variants: list[Variant]):
+  for v in variants:
+    v.nodominated = True
+    v.linkedTo = v.name
+
+
+def pareto(variants: list[Variant]):
+  for a in variants:
+    for b in variants:
+      if a.name == b.name:
+        continue
+
+      s = 0
+      check_not_equal = False
+      for i in range(len(b.scores)):
+        if a.scores[i] >= b.scores[i]:
+          s += 1
+        if a.scores[i] > b.scores[i]:
+          check_not_equal = True
+      
+      if (s == len(b.scores)) and check_not_equal:
+        b.linkedTo = a.name
+        b.nodominated = False
