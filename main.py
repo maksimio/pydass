@@ -38,8 +38,8 @@ for v in variants:
   print(v)
 
 # -+-+-+-+-+- Временно исключим 5 и 6
-del variants[4]
 del variants[5]
+del variants[4]
 
 print('\n')
 for v in variants:
