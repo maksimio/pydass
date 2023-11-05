@@ -71,7 +71,7 @@ def pareto(variants: list[Variant]):
 def quality_domination_matrix(scores: list[int], importance_vector: list[int], q: int):
   matrix = []
   for k in range(1, q, 1): # k от 1 до q - 1 включительно (ФОРМУЛА 2.2)
-    values = [vector if score <= k else 0 for score, vector in zip(scores, importance_vector)]
+    values = [v if y <= k else 0 for y, v in zip(scores, importance_vector)]
     values.sort()
     matrix.append(values)
   
@@ -81,8 +81,6 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
   q = scale.gradeCount # ФОРМУЛА 2.2
 
   # Вычисляем вектор важности критериев 
-  print('---------------')
-  print(importance)
   importances = importance.importances.copy()
   importances.reverse()
   importance_vector, k = [], 1
@@ -91,11 +89,14 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
     if imp:
       k += 1
   importance_vector.reverse() # ФОРМУЛА 2.4
-  print(importance_vector)
 
   # Вычисляем матрицы B↑
+  importance_vector_new = list(np.empty(len(importance_vector)))
+  for pos, value in zip(importance.positions, importance_vector):
+    importance_vector_new[pos] = value
+
   for v in variants:
-    v.matrix = quality_domination_matrix(v.scores, importance_vector, q)
+    v.matrix = quality_domination_matrix(v.scores, importance_vector_new, q)
   
   # Попарное сравнение векторов оценок (ФОРМУЛА 2.7)
   for v1 in variants:

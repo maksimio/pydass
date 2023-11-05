@@ -27,8 +27,7 @@ for v in variants:
 dass.reset_domination(variants)
 
 # -+-+-+-+-+- Сравнение вариантов по предпочтительности
-dass.quality_domination(variants, importance, scale)
-
 print('--- Свой алгоритм:')
+dass.quality_domination(variants, importance, scale)
 for v in variants:
   print(v)
