@@ -1,7 +1,7 @@
 import xmltodict
 import dass
 
-FILENAME = 'student.xml'
+FILENAME = 'smartphone.xml'
 
 # -+-+-+-+-+- Чтение данных из файла
 with open(FILENAME, encoding='utf-16-le') as xml_file:

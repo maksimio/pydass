@@ -79,16 +79,19 @@ def quality_domination_matrix(scores: list[int], importance_vector: list[int], q
 
 def quality_domination(variants: list[Variant], importance: Importance, scale: Scale):
   q = scale.gradeCount # ФОРМУЛА 2.2
-  importances = importance.importances.copy()
-  importances.reverse()
 
   # Вычисляем вектор важности критериев 
+  print('---------------')
+  print(importance)
+  importances = importance.importances.copy()
+  importances.reverse()
   importance_vector, k = [], 1
   for imp in importances: # ФОРМУЛА 2.6
     importance_vector.append(k)
     if imp:
       k += 1
   importance_vector.reverse() # ФОРМУЛА 2.4
+  print(importance_vector)
 
   # Вычисляем матрицы B↑
   for v in variants:
@@ -102,5 +105,6 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
       res = v1.matrix - v2.matrix
       if np.any(res < 0) or (not np.any(res > 0)):
         continue
+      print(v2.name, 'лучше, чем', v1.name)
       v1.linkedTo = v2.name
       v1.nodominated = False
