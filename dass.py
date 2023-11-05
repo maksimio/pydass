@@ -105,9 +105,9 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
     for v2 in variants:
       if v1 == v2:
         continue # Вектора оценок не сравниваются между собой
-      res = v2.matrix - v1.matrix
+      res = v1.matrix - v2.matrix
       if np.any(res < 0) or (not np.any(res > 0)):
         continue
-      
-      print('hello wewe', v1.name, v2.name)
+      v1.linkedTo = v2.name
+      v1.nodominated = False
 

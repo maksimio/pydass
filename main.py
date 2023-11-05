@@ -1,12 +1,10 @@
 import xmltodict
 import dass
 
+FILENAME = 'student.xml'
+
 # -+-+-+-+-+- Чтение данных из 
-e1 = 'utf-8'
-f1 = 'smartphone.xml'
-e2 = 'utf-16-le'
-f2 = 'student.xml'
-with open(f2, encoding=e2) as xml_file:
+with open(FILENAME, encoding='utf-16-le') as xml_file:
   decision = xmltodict.parse(xml_file.read())['decision']
 
 criterions = [dass.Criterion(c) for c in decision['criterionList']['criterion']]
@@ -25,15 +23,11 @@ print('--- Варианты:')
 for v in variants:
   print(v)
 
-print('\n\n\n')
-for v in variants:
-  print(v)
-
 # -+-+-+-+-+- Принцип Парето
 # информация о важности не используется
 dass.reset_domination(variants)
 dass.pareto(variants)
-print('\n')
+print('\n--- Принцип Парето:')
 for v in variants:
   print(v)
 
@@ -47,3 +41,8 @@ for v in variants:
 
 # -+-+-+-+-+- Сравнение вариантов по предпочтительности
 dass.quality_domination(variants, importance, scale)
+
+
+print('\n')
+for v in variants:
+  print(v)
