@@ -92,10 +92,6 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
       k += 1
   importance_vector.reverse()
 
-  print(importance.importances)
-  print(importance.positions)
-  print(importance_vector)
-  print('-----------------------')
   # 3. Вычисляем матрицы B↑
   for v in variants:
     v.matrix = quality_domination_matrix(v.scores, importance_vector, 3, k_max)
