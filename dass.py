@@ -52,8 +52,8 @@ def reset_domination(variants: list[Variant]):
 def pareto(variants: list[Variant]):
   for a in variants:
     for b in variants:
-      if a.name == b.name:
-        continue
+      if a == b:
+        continue # Вектора оценок не сравниваются между собой
 
       s = 0
       check_not_equal = False
@@ -68,35 +68,33 @@ def pareto(variants: list[Variant]):
         b.nodominated = False
 
 
-def quality_domination_matrix(scores: list[int], importance_vector: list[int], k_min: int, k_max: int):
+def quality_domination_matrix(scores: list[int], importance_vector: list[int], q: int):
   matrix = []
-  for k in range(k_min, k_max + 1, 1):
+  for k in range(1, q, 1): # k от 1 до q - 1 включительно (ФОРМУЛА 2.2)
     values = [vector if score <= k else 0 for score, vector in zip(scores, importance_vector)]
     values.sort()
     matrix.append(values)
+  
   return np.array(matrix)
 
 def quality_domination(variants: list[Variant], importance: Importance, scale: Scale):
-  # 1. Указываем k
-  k_max = scale.gradeCount - 1
-  # 2. Даем оценку признакам в соответствии с важностью
-  d = 0
+  q = scale.gradeCount # ФОРМУЛА 2.2
   importances = importance.importances.copy()
   importances.reverse()
 
-  importance_vector = []
-  k = 1
-  for imp in importances:
+  # Вычисляем вектор важности критериев 
+  importance_vector, k = [], 1
+  for imp in importances: # ФОРМУЛА 2.6
     importance_vector.append(k)
     if imp:
       k += 1
-  importance_vector.reverse()
+  importance_vector.reverse() # ФОРМУЛА 2.4
 
-  # 3. Вычисляем матрицы B↑
+  # Вычисляем матрицы B↑
   for v in variants:
-    v.matrix = quality_domination_matrix(v.scores, importance_vector, 3, k_max)
+    v.matrix = quality_domination_matrix(v.scores, importance_vector, q)
   
-  # 3. Попарное сравнение векторов оценок
+  # Попарное сравнение векторов оценок (ФОРМУЛА 2.7)
   for v1 in variants:
     for v2 in variants:
       if v1 == v2:
@@ -106,4 +104,3 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
         continue
       v1.linkedTo = v2.name
       v1.nodominated = False
-
