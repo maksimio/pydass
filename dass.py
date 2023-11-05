@@ -15,7 +15,7 @@ class Variant:
 
 class Scale:
   def __init__(self, s):
-    self.gradeCount = s['gradeCount']
+    self.gradeCount = int(s['gradeCount'])
     # рассматривается только порядковая шкала
   
   def __str__(self):
@@ -64,3 +64,11 @@ def pareto(variants: list[Variant]):
       if (s == len(b.scores)) and check_not_equal:
         b.linkedTo = a.name
         b.nodominated = False
+
+def quality_domination(variants: list[Variant], importance: Importance, scale: Scale):
+  # 1. Указываем k
+  k_max = scale.gradeCount - 1
+  # 2. Даем оценку признакам в соответствии с важностью
+  d = 0
+  print(importance.importances)
+  print(importance.positions)
