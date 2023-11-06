@@ -16,17 +16,17 @@ print('--- Экспортированные варианты:', variants)
 dass.reset_domination(variants)
 dominated_variants = []
 
-# -+-+-+-+-+- Принцип Парето
+# -+-+-+-+-+- Принцип Парето (СТРАНИЦА 13)
 dass.pareto(variants)
 dass.move_dominated(variants, dominated_variants)
 print('\n--- Принцип Парето:', variants, '\n', dominated_variants)
 
-# -+-+-+-+-+- Качественная важность
+# -+-+-+-+-+- Качественная важность (СТРАНИЦА 34)
 dass.quality_domination(variants, importance, scale)
 dass.move_dominated(variants, dominated_variants)
 print('\n--- Качественная важность:', variants, '\n', dominated_variants)
 
-# -+-+-+-+-+- Количественная важность
+# -+-+-+-+-+- Количественная важность (СТРАНИЦА 53)
 dass.count_domination(variants, importance, scale)
 dass.move_dominated(variants, dominated_variants)
 print('\n--- Количественная важность:', variants, '\n', dominated_variants)

@@ -62,6 +62,7 @@ def move_dominated(non_dominated: list[Variant], dominated: list[Variant]):
       dominated.append(obj)
       non_dominated.remove(obj)
 
+
 def pareto(variants: list[Variant]):
   '''Принцип Парето. Используется для сравнения вариантов 
   без информации о важности критериев'''
@@ -126,6 +127,7 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
         continue
       v1.linkedTo = v2.name
       v1.nodominated = False
+
 
 def count_domination(variants: list[Variant], importance: Importance, scale: Scale):
   '''Количественная важность'''
