@@ -139,7 +139,6 @@ def count_domination(variants: list[Variant], importance: Importance, scale: Sca
   n_model = [1]
   coefs = importance.importance_coefs.copy()
   coefs.reverse()
-  print(coefs)
   for i in range(len(coefs)):
     n_model.append(coefs[i] * n_model[i])
   
