@@ -2,7 +2,7 @@ import xmltodict
 import dass
 
 # Страница 36 пособия
-FILENAME = 'student.xml'
+FILENAME = 'student2.xml'
 
 # -+-+-+-+-+- Чтение данных из файла
 with open(FILENAME, encoding='utf-16-le') as xml_file:
@@ -24,17 +24,21 @@ print('\n--- Принцип Парето:')
 for v in variants:
   print(v)
 
-# -+-+-+-+-+- Исключим 5 и 6
-del variants[5]
+# -+-+-+-+-+- Качественная информация о важности
+del variants[5] # исключаем варианты 5 и 6
 del variants[4]
-
-print('\n--- Исключим 5 и 6')
-for v in variants:
-  print(v)
-
-# -+-+-+-+-+- Сравнение вариантов по предпочтительности
 dass.quality_domination(variants, importance, scale)
 
-print('\n--- Сравнение вариантов по предпочтительности')
+print('\n--- Качественная важность')
 for v in variants:
   print(v)
+
+
+# -+-+-+-+-+- Количественная важность
+del variants[3] # исключаем вариант 4 как доминируемый
+dass.count_domination(variants, importance, scale)
+
+print('\n--- Количественная важность')
+for v in variants:
+  print(v)
+

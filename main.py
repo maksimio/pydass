@@ -1,7 +1,7 @@
 import xmltodict
 import dass
 
-FILENAME = 'smartphone.xml'
+FILENAME = 'smartphone2.xml'
 
 # -+-+-+-+-+- Чтение данных из файла
 with open(FILENAME, encoding='utf-16-le') as xml_file:
@@ -26,8 +26,15 @@ for v in variants:
 # информация о важности не используется
 dass.reset_domination(variants)
 
-# -+-+-+-+-+- Сравнение вариантов по предпочтительности
+# -+-+-+-+-+- Качественная информация о важности
 print('--- Свой алгоритм:')
 dass.quality_domination(variants, importance, scale)
+for v in variants:
+  print(v)
+
+# -+-+-+-+-+- Количественная важность
+dass.count_domination(variants, importance, scale)
+
+print('\n--- Количественная важность')
 for v in variants:
   print(v)

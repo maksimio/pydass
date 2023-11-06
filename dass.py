@@ -9,7 +9,8 @@ class Variant:
     self.scores = list(map(int, v['scores']['sc']))
     self.linkedTo = v['linkedTo']
 
-    self.matrix = [] # TODO: убрать
+    self.matrix = []
+    self.long_scores = []
   
   def __str__(self):
     return 'вариант: {0: >7}, недоминируемый: {1: 1}, доминирующий: {2: >7}, оценки: {3}'.format(self.name, self.nodominated, self.linkedTo, self.scores)
@@ -38,9 +39,10 @@ class Importance:
     # пока только для порядковой важности
     self.positions = list(map(int, i['order']['positions']['pos']))
     self.importances =  [ri == 'less' for ri in i['order']['relativeImportance']['ri']]
+    self.importance_coefs = list(map(float, i['importanceCoefs']['ic']))
 
   def __str__(self):
-    return '{0}\n{1}'.format(self.positions, self.importances)
+    return '{0}\n{1}\n{2}'.format(self.positions, self.importances, self.importance_coefs)
 
 # ------------------------ ОБРАБОТКА
 def reset_domination(variants: list[Variant]):
@@ -109,3 +111,55 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
       print(v2.name, 'лучше, чем', v1.name)
       v1.linkedTo = v2.name
       v1.nodominated = False
+
+def count_domination(variants: list[Variant], importance: Importance, scale: Scale):
+  # Вычисление N-модели
+  # Чтобы не искать наименьший общий множитель до целого
+  # просто умножим на 1e3, округлим до целого. 
+  # Считаем, что такой точности достаточно
+  mult = 1e9
+  n_model = [1]
+  coefs = importance.importance_coefs.copy()
+  coefs.reverse()
+  print(coefs)
+  for i in range(len(coefs)):
+    n_model.append(coefs[i] * n_model[i])
+  
+  n_model.reverse()
+  n_model = np.array(n_model) * mult
+  n_model = np.array(list(map(int, n_model)))
+  
+  # Оптимизация N-модели через поиск наибольшего общего делителя
+  gdc = np.gcd.reduce(n_model)
+  n_model = list(map(int, n_model / gdc))
+
+  # Применение N-модели к вариантам (получение удлиненных оценок)
+  n_model_len = 0
+  for n in n_model:
+    n_model_len += n
+
+  for v in variants:
+    v.long_scores = []
+    for n, s in zip(n_model, v.scores):
+      for i in range(n):
+        v.long_scores.append(s)
+      
+    v.long_scores.sort(reverse=True) # По невозрастанию
+
+  # Применение метода Парето к удлиненным оценкам
+  for a in variants:
+    for b in variants:
+      if a == b:
+        continue # Вектора оценок не сравниваются между собой
+
+      s = 0
+      check_not_equal = False
+      for i in range(len(b.long_scores)):
+        if a.long_scores[i] >= b.long_scores[i]:
+          s += 1
+        if a.long_scores[i] > b.long_scores[i]:
+          check_not_equal = True
+      
+      if (s == len(b.long_scores)) and check_not_equal:
+        b.linkedTo = a.name
+        b.nodominated = False
