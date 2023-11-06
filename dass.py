@@ -15,6 +15,9 @@ class Variant:
   def __str__(self):
     return 'вариант: {0: >7}, недоминируемый: {1: 1}, доминирующий: {2: >7}, оценки: {3}'.format(self.name, self.nodominated, self.linkedTo, self.scores)
 
+  def __repr__(self):
+    return '\nвариант: {0: >7}, недоминируемый: {1: 1}, доминирующий: {2: >7}, оценки: {3}'.format(self.name, self.nodominated, self.linkedTo, self.scores)
+ 
 
 class Scale:
   def __init__(self, s):
@@ -46,12 +49,22 @@ class Importance:
 
 # ------------------------ ОБРАБОТКА
 def reset_domination(variants: list[Variant]):
+  '''Сброс информации о доминации. Используется после чтения файла DASS'''
   for v in variants:
     v.nodominated = True
     v.linkedTo = v.name
 
 
+def move_dominated(non_dominated: list[Variant], dominated: list[Variant]):
+  '''Перемещение доминируемых вариантов в отдельный список для удобства работы'''
+  for obj in non_dominated.copy():
+    if not obj.nodominated:
+      dominated.append(obj)
+      non_dominated.remove(obj)
+
 def pareto(variants: list[Variant]):
+  '''Принцип Парето. Используется для сравнения вариантов 
+  без информации о важности критериев'''
   for a in variants:
     for b in variants:
       if a == b:
@@ -71,6 +84,7 @@ def pareto(variants: list[Variant]):
 
 
 def quality_domination_matrix(scores: list[int], importance_vector: list[int], q: int):
+  '''Матрица B↑ для поиска качественной важности'''
   matrix = []
   for k in range(1, q, 1): # k от 1 до q - 1 включительно (ФОРМУЛА 2.2)
     values = [v if y <= k else 0 for y, v in zip(scores, importance_vector)]
@@ -79,7 +93,9 @@ def quality_domination_matrix(scores: list[int], importance_vector: list[int], q
   
   return np.array(matrix)
 
+
 def quality_domination(variants: list[Variant], importance: Importance, scale: Scale):
+  '''Качественная важность'''
   q = scale.gradeCount # ФОРМУЛА 2.2
 
   # Вычисляем вектор важности критериев 
@@ -108,11 +124,11 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
       res = v1.matrix - v2.matrix
       if np.any(res < 0) or (not np.any(res > 0)):
         continue
-      print(v2.name, 'лучше, чем', v1.name)
       v1.linkedTo = v2.name
       v1.nodominated = False
 
 def count_domination(variants: list[Variant], importance: Importance, scale: Scale):
+  '''Количественная важность'''
   # Вычисление N-модели
   # Чтобы не искать наименьший общий множитель до целого
   # просто умножим на 1e3, округлим до целого. 
@@ -146,7 +162,7 @@ def count_domination(variants: list[Variant], importance: Importance, scale: Sca
       
     v.long_scores.sort(reverse=True) # По невозрастанию
 
-  # Применение метода Парето к удлиненным оценкам
+  # Применение метода Парето к удлиненным оценкам long_scores
   for a in variants:
     for b in variants:
       if a == b:

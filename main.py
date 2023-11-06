@@ -1,9 +1,9 @@
 import xmltodict
 import dass
 
-FILENAME = 'smartphone2.xml'
+FILENAME = 'input/student.xml'
 
-# -+-+-+-+-+- Чтение данных из файла
+# -+-+-+-+-+- Экспортированные варианты
 with open(FILENAME, encoding='utf-16-le') as xml_file:
   decision = xmltodict.parse(xml_file.read())['decision']
 
@@ -12,29 +12,21 @@ scale = dass.Scale(decision['scale'])
 importance = dass.Importance(decision['importance'])
 variants = [dass.Variant(v) for v in decision['variantList']['variant']]
 
-print('--- Критерии')
-for c in criterions:
-  print(c, end=', ')
-print('\nШкала')
-print(scale)
-print('Важность')
-print(importance)
-print('--- DASS:')
-for v in variants:
-  print(v)
-
-# информация о важности не используется
+print('--- Экспортированные варианты:', variants)
 dass.reset_domination(variants)
+dominated_variants = []
 
-# -+-+-+-+-+- Качественная информация о важности
-print('--- Свой алгоритм:')
+# -+-+-+-+-+- Принцип Парето
+dass.pareto(variants)
+dass.move_dominated(variants, dominated_variants)
+print('\n--- Принцип Парето:', variants, '\n', dominated_variants)
+
+# -+-+-+-+-+- Качественная важность
 dass.quality_domination(variants, importance, scale)
-for v in variants:
-  print(v)
+dass.move_dominated(variants, dominated_variants)
+print('\n--- Качественная важность:', variants, '\n', dominated_variants)
 
 # -+-+-+-+-+- Количественная важность
 dass.count_domination(variants, importance, scale)
-
-print('\n--- Количественная важность')
-for v in variants:
-  print(v)
+dass.move_dominated(variants, dominated_variants)
+print('\n--- Количественная важность:', variants, '\n', dominated_variants)
