@@ -1,6 +1,8 @@
 import xmltodict
 import dass
+from time import time
 
+COUNT = 10000 # количество вызовов функции
 FILENAME = 'input/smartphone.xml'
 
 # -+-+-+-+-+- Экспортированные варианты
@@ -17,16 +19,16 @@ dass.reset_domination(variants)
 dominated_variants = []
 
 # -+-+-+-+-+- Принцип Парето (СТРАНИЦА 13)
-dass.pareto(variants)
+t = dass.timing(COUNT, dass.pareto, variants)
 dass.move_dominated(variants, dominated_variants)
-print('\n--- Принцип Парето:', variants, '\n', dominated_variants)
+print('\n--- ', t, ' Принцип Парето:', variants, '\n', dominated_variants)
 
 # -+-+-+-+-+- Качественная важность (СТРАНИЦА 34)
-dass.quality_domination(variants, importance, scale)
+t = dass.timing(COUNT, dass.quality_domination, variants, importance, scale)
 dass.move_dominated(variants, dominated_variants)
-print('\n--- Качественная важность:', variants, '\n', dominated_variants)
+print('\n--- ', t, ' Качественная важность:', variants, '\n', dominated_variants)
 
 # -+-+-+-+-+- Количественная важность (СТРАНИЦА 53)
-dass.count_domination(variants, importance, scale)
+t = dass.timing(COUNT, dass.count_domination, variants, importance, scale)
 dass.move_dominated(variants, dominated_variants)
-print('\n--- Количественная важность:', variants, '\n', dominated_variants)
+print('\n--- ', t, ' Количественная важность:', variants, '\n', dominated_variants)

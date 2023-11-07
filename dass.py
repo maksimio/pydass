@@ -1,5 +1,9 @@
+'''Пособие: В.В. Подиновский, "Идеи и методы теории важности критериев", 2019 г.
+http://mcodm.ru/theory/Podinovski%202019.pdf'''
+
 from dataclasses import dataclass, field
 import numpy as np
+from time import time
 
 # ------------------------ ТИПЫ ДАННЫХ
 class Variant:
@@ -7,16 +11,16 @@ class Variant:
     self.name = v['@vname']
     self.nodominated = v['@nondominated'] == 'yes'
     self.scores = list(map(int, v['scores']['sc']))
-    self.linkedTo = v['linkedTo']
+    self.linkedTo = set([v['linkedTo']])
 
     self.matrix = []
     self.long_scores = []
-  
+
   def __str__(self):
-    return 'вариант: {0: >7}, недоминируемый: {1: 1}, доминирующий: {2: >7}, оценки: {3}'.format(self.name, self.nodominated, self.linkedTo, self.scores)
+    return 'вариант: {0: >7}, оценки: {3}, недоминируемый: {1: 1}, доминирующие: {2}'.format(self.name, self.nodominated, ','.join(self.linkedTo), self.scores)
 
   def __repr__(self):
-    return '\nвариант: {0: >7}, недоминируемый: {1: 1}, доминирующий: {2: >7}, оценки: {3}'.format(self.name, self.nodominated, self.linkedTo, self.scores)
+    return '\nвариант: {0: >7}, оценки: {3}, недоминируемый: {1: 1}, доминирующие: {2}'.format(self.name, self.nodominated, ','.join(self.linkedTo), self.scores)
  
 
 class Scale:
@@ -52,7 +56,7 @@ def reset_domination(variants: list[Variant]):
   '''Сброс информации о доминации. Используется после чтения файла DASS'''
   for v in variants:
     v.nodominated = True
-    v.linkedTo = v.name
+    v.linkedTo = set()
 
 
 def move_dominated(non_dominated: list[Variant], dominated: list[Variant]):
@@ -80,7 +84,7 @@ def pareto(variants: list[Variant]):
           check_not_equal = True
       
       if (s == len(b.scores)) and check_not_equal:
-        b.linkedTo = a.name
+        b.linkedTo.add(a.name)
         b.nodominated = False
 
 
@@ -97,8 +101,6 @@ def quality_domination_matrix(scores: list[int], importance_vector: list[int], q
 
 def quality_domination(variants: list[Variant], importance: Importance, scale: Scale):
   '''Качественная важность'''
-  q = scale.gradeCount # ФОРМУЛА 2.2
-
   # Вычисляем вектор важности критериев 
   importances = importance.importances.copy()
   importances.reverse()
@@ -115,7 +117,7 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
     importance_vector_new[pos] = value
 
   for v in variants:
-    v.matrix = quality_domination_matrix(v.scores, importance_vector_new, q)
+    v.matrix = quality_domination_matrix(v.scores, importance_vector_new, scale.gradeCount)
   
   # Попарное сравнение векторов оценок (ФОРМУЛА 2.7)
   for v1 in variants:
@@ -125,7 +127,7 @@ def quality_domination(variants: list[Variant], importance: Importance, scale: S
       res = v1.matrix - v2.matrix
       if np.any(res < 0) or (not np.any(res > 0)):
         continue
-      v1.linkedTo = v2.name
+      v1.linkedTo.add(v2.name)
       v1.nodominated = False
 
 
@@ -133,10 +135,10 @@ def count_domination(variants: list[Variant], importance: Importance, scale: Sca
   '''Количественная важность'''
   # Вычисление N-модели
   # Чтобы не искать наименьший общий множитель до целого
-  # просто умножим на 1e3, округлим до целого. 
-  # Считаем, что такой точности достаточно
+  # просто умножим на 1e9, округлим до целого. 
+  # Считаем, что такой точности в 9 знаков достаточно
   mult = 1e9
-  n_model = [1]
+  n_model = [1] # Заполняется с конца, первая всегда единица (наименьшее целое)
   coefs = importance.importance_coefs.copy()
   coefs.reverse()
   for i in range(len(coefs)):
@@ -149,6 +151,8 @@ def count_domination(variants: list[Variant], importance: Importance, scale: Sca
   # Оптимизация N-модели через поиск наибольшего общего делителя
   gdc = np.gcd.reduce(n_model)
   n_model = list(map(int, n_model / gdc))
+  while n_model[0] > 1e2: # Ограничиваем размер N-модели
+    n_model = list(map(int, np.array(n_model) / 2))
 
   # Применение N-модели к вариантам (получение удлиненных оценок)
   n_model_len = 0
@@ -178,5 +182,15 @@ def count_domination(variants: list[Variant], importance: Importance, scale: Sca
           check_not_equal = True
       
       if (s == len(b.long_scores)) and check_not_equal:
-        b.linkedTo = a.name
+        b.linkedTo.add(a.name)
         b.nodominated = False
+
+
+def timing(count: int, func, *params):
+  '''Возвращает время выполнения функции'''
+  start = time()
+  for i in range(count):
+    func(*params)
+  stop = time()
+  t = str(int((stop - start) * 1000000 / count)) + ' мкс'  
+  return t
