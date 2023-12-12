@@ -21,6 +21,9 @@ class Variant:
 
   def __repr__(self):
     return '\nвариант: {0: >7}, оценки: {3}, недоминируемый: {1: 1}, доминирующие: {2}'.format(self.name, self.nodominated, ','.join(self.linkedTo), self.scores)
+
+  def toJSON(self):
+    return {'name': self.name, 'nodominated': self.nodominated, 'scores': self.scores, 'linkedTo': list(self.linkedTo)}
  
 
 class Scale:
@@ -30,6 +33,9 @@ class Scale:
   
   def __str__(self):
     return str(self.gradeCount)
+  
+  def toJSON(self):
+    return {'gradeCount': self.gradeCount}
 
 
 class Criterion:
@@ -38,6 +44,9 @@ class Criterion:
     
   def __str__(self):
     return self.name
+
+  def toJSON(self):
+    return {'name': self.name}
 
 
 class Importance:
@@ -50,6 +59,9 @@ class Importance:
 
   def __str__(self):
     return '{0}\n{1}\n{2}'.format(self.positions, self.importances, self.importance_coefs)
+
+  def toJSON(self):
+    return {'active': self.active, 'positions': self.positions, 'importances': self.importances, 'importance_coefs': self.importance_coefs}
 
 # ------------------------ ОБРАБОТКА
 def reset_domination(variants: list[Variant]):
